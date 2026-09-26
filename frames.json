@@ -1,0 +1,83 @@
+{
+  "version": 2,
+  "canvas": {
+    "w": 2048,
+    "h": 1152
+  },
+  "frames": [
+    {
+      "id": "gallery-black",
+      "name": "Gallery Black",
+      "file": "gallery-black.png",
+      "x": 94,
+      "y": 94,
+      "w": 1860,
+      "h": 964
+    },
+    {
+      "id": "natural-oak",
+      "name": "Natural Oak",
+      "file": "natural-oak.png",
+      "x": 108,
+      "y": 108,
+      "w": 1832,
+      "h": 936
+    },
+    {
+      "id": "classic-gold",
+      "name": "Classic Gold",
+      "file": "classic-gold.png",
+      "x": 104,
+      "y": 104,
+      "w": 1840,
+      "h": 944
+    },
+    {
+      "id": "floating-walnut",
+      "name": "Floating Walnut",
+      "file": "floating-walnut.png",
+      "x": 40,
+      "y": 40,
+      "w": 1968,
+      "h": 1072
+    }
+  ],
+  "by_name": {
+    "Gallery Black": {
+      "id": "gallery-black",
+      "name": "Gallery Black",
+      "file": "gallery-black.png",
+      "x": 94,
+      "y": 94,
+      "w": 1860,
+      "h": 964
+    },
+    "Natural Oak": {
+      "id": "natural-oak",
+      "name": "Natural Oak",
+      "file": "natural-oak.png",
+      "x": 108,
+      "y": 108,
+      "w": 1832,
+      "h": 936
+    },
+    "Classic Gold": {
+      "id": "classic-gold",
+      "name": "Classic Gold",
+      "file": "classic-gold.png",
+      "x": 104,
+      "y": 104,
+      "w": 1840,
+      "h": 944
+    },
+    "Floating Walnut": {
+      "id": "floating-walnut",
+      "name": "Floating Walnut",
+      "file": "floating-walnut.png",
+      "x": 40,
+      "y": 40,
+      "w": 1968,
+      "h": 1072
+    }
+  }
+}
