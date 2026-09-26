@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "canvas": {
     "w": 2048,
     "h": 1152
@@ -40,6 +40,33 @@
       "y": 40,
       "w": 1968,
       "h": 1072
+    },
+    {
+      "id": "gallery-black-no-mat",
+      "name": "Gallery Black",
+      "file": "gallery-black-no-mat.png",
+      "x": 30,
+      "y": 30,
+      "w": 1988,
+      "h": 1092
+    },
+    {
+      "id": "natural-oak-no-mat",
+      "name": "Natural Oak",
+      "file": "natural-oak-no-mat.png",
+      "x": 48,
+      "y": 48,
+      "w": 1952,
+      "h": 1056
+    },
+    {
+      "id": "classic-gold-no-mat",
+      "name": "Classic Gold",
+      "file": "classic-gold-no-mat.png",
+      "x": 60,
+      "y": 60,
+      "w": 1928,
+      "h": 1032
     }
   ],
   "by_name": {
@@ -78,6 +105,79 @@
       "y": 40,
       "w": 1968,
       "h": 1072
+    }
+  },
+  "catalog": {
+    "Gallery Black": {
+      "With mat": {
+        "id": "gallery-black",
+        "name": "Gallery Black",
+        "file": "gallery-black.png",
+        "x": 94,
+        "y": 94,
+        "w": 1860,
+        "h": 964
+      },
+      "No mat": {
+        "id": "gallery-black-no-mat",
+        "name": "Gallery Black",
+        "file": "gallery-black-no-mat.png",
+        "x": 30,
+        "y": 30,
+        "w": 1988,
+        "h": 1092
+      }
+    },
+    "Natural Oak": {
+      "With mat": {
+        "id": "natural-oak",
+        "name": "Natural Oak",
+        "file": "natural-oak.png",
+        "x": 108,
+        "y": 108,
+        "w": 1832,
+        "h": 936
+      },
+      "No mat": {
+        "id": "natural-oak-no-mat",
+        "name": "Natural Oak",
+        "file": "natural-oak-no-mat.png",
+        "x": 48,
+        "y": 48,
+        "w": 1952,
+        "h": 1056
+      }
+    },
+    "Classic Gold": {
+      "With mat": {
+        "id": "classic-gold",
+        "name": "Classic Gold",
+        "file": "classic-gold.png",
+        "x": 104,
+        "y": 104,
+        "w": 1840,
+        "h": 944
+      },
+      "No mat": {
+        "id": "classic-gold-no-mat",
+        "name": "Classic Gold",
+        "file": "classic-gold-no-mat.png",
+        "x": 60,
+        "y": 60,
+        "w": 1928,
+        "h": 1032
+      }
+    },
+    "Floating Walnut": {
+      "Standard": {
+        "id": "floating-walnut",
+        "name": "Floating Walnut",
+        "file": "floating-walnut.png",
+        "x": 40,
+        "y": 40,
+        "w": 1968,
+        "h": 1072
+      }
     }
   }
 }

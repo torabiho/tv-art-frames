@@ -226,6 +226,9 @@ def build(f):
     base = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB")
     if f["mat"]:
         ov = overlay_png(f["win"])
+    elif f.get("lip"):
+        # no mat: the moulding's inner lip casts a shadow straight onto the photo
+        ov = overlay_png(f["win"], depth=16, strength=0.38, sheen=True)
     else:
         ov = overlay_png(f["win"], depth=10, strength=0.18, sheen=False)
     # One file per frame: opaque frame + mat, see-through window that carries only the inner shadow.
@@ -238,9 +241,26 @@ def build(f):
                 x=x0, y=y0, w=x1 - x0, h=y1 - y0)
 
 
+# Every matted frame also gets a "No mat" version: photo runs right up to the moulding.
+NO_MAT = [dict(f, id=f["id"] + "-no-mat", mat=0, gap=0, lip=True, win=edge_win(f["mould"], 0))
+          for f in FRAMES if f["mat"]]
+
 frames = [build(f) for f in FRAMES]
-manifest = {"version": 2, "canvas": {"w": W, "h": H}, "frames": frames,
-            "by_name": {f["name"]: f for f in frames}}
+no_mat = {f["name"]: build(dict(f)) for f in NO_MAT}
+
+# catalog: frame name -> variant name -> frame entry (read by shortcut v8+).
+# A frame with one variant makes the shortcut skip the mat question automatically.
+catalog = {}
+for f in frames:
+    if f["name"] in no_mat:
+        catalog[f["name"]] = {"With mat": f, "No mat": no_mat[f["name"]]}
+    else:
+        catalog[f["name"]] = {"Standard": f}
+
+manifest = {"version": 3, "canvas": {"w": W, "h": H},
+            "frames": frames + list(no_mat.values()),
+            "by_name": {f["name"]: f for f in frames},   # kept for shortcut v7
+            "catalog": catalog}
 with open(os.path.join(OUT, "frames.json"), "w") as fh:
     json.dump(manifest, fh, indent=2)
 print(json.dumps(manifest, indent=2))

@@ -8,12 +8,12 @@ The shortcut downloads `frames.json` and the PNGs in `frames/` from this repo ea
 
 - One PNG per frame, 2048 × 1152, RGBA.
 - The frame and mat are opaque. The photo window is see-through, apart from a soft inner shadow.
-- `frames.json` lists each frame's name, file, and window position (`x`, `y`, `w`, `h` in pixels). `by_name` is what the shortcut reads.
+- `frames.json` lists each frame's name, file, and window position (`x`, `y`, `w`, `h` in pixels). `catalog` groups them as frame → variant (for example "With mat" / "No mat") and is what the shortcut reads; a frame with one variant skips the mat question. `by_name` is kept for older shortcut versions.
 
 ## Adding a frame
 
 1. Add the PNG to `frames/`.
-2. Add its entry to both `frames` and `by_name` in `frames.json`.
+2. Add its entry to `frames` and to `catalog` in `frames.json` (under the frame name, keyed by variant).
 3. Commit and push. The shortcut picks it up on its next run (GitHub may cache for a few minutes).
 
 ## Scripts

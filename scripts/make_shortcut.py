@@ -63,7 +63,7 @@ actions += [act("is.workflow.actions.comment",
 # 1. frames.json -> dictionary
 actions += geturl(f"{BASE_URL}/frames.json", "ManifestFile")
 actions += [act("is.workflow.actions.detect.dictionary", WFInput=var("ManifestFile")), setvar("Manifest")]
-actions += getkey("Manifest", "by_name", "Frames")
+actions += getkey("Manifest", "catalog", "Frames")
 # 2. choose frame
 actions += [act("is.workflow.actions.getvalueforkey", WFInput=var("Frames"),
                 WFGetDictionaryValueType="All Keys"), setvar("FrameNames")]
@@ -71,6 +71,14 @@ actions += [act("is.workflow.actions.choosefromlist", WFInput=var("FrameNames"),
                 WFChooseFromListActionPrompt="Choose a frame"), setvar("FrameName")]
 actions += [act("is.workflow.actions.getvalueforkey", WFInput=var("Frames"),
                 WFDictionaryKey=text(("var", "FrameName")), WFGetDictionaryValueType="Value"),
+            setvar("Variants")]
+# 2b. mat choice; a frame with a single variant is picked automatically, no question shown
+actions += [act("is.workflow.actions.getvalueforkey", WFInput=var("Variants"),
+                WFGetDictionaryValueType="All Keys"), setvar("VariantNames")]
+actions += [act("is.workflow.actions.choosefromlist", WFInput=var("VariantNames"),
+                WFChooseFromListActionPrompt="With or without mat?"), setvar("VariantName")]
+actions += [act("is.workflow.actions.getvalueforkey", WFInput=var("Variants"),
+                WFDictionaryKey=text(("var", "VariantName")), WFGetDictionaryValueType="Value"),
             setvar("Frame")]
 for k, out in [("file", "FileName"), ("x", "X"), ("y", "Y"), ("w", "W"), ("h", "H"), ("id", "FrameId")]:
     actions += getkey("Frame", k, out)
