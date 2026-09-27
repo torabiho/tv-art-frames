@@ -23,6 +23,8 @@ The shortcut downloads `frames.json` and the PNGs in `frames/` from this repo ea
 
 ## Scripts
 
+- `scripts/real_frames.py` renders the frame images (photo-textured, lit mouldings). It needs CC0 wood textures from [Poly Haven](https://polyhaven.com) in `scripts/tex/`: `oak_veneer_01.jpg`, `ash_veneer.jpg`, `walnut_veneer_02.jpg` (2k diffuse). Geometry matches `make_frames.py`, so `frames.json` is unchanged.
+
 - `scripts/make_frames.py` draws the starter frames and writes `frames.json`.
 - `scripts/make_shortcut.py` builds the unsigned shortcut. Set `FRAMES_URL` to this repo's raw URL, then sign it on a Mac with
   `shortcuts sign -m anyone -i <unsigned> -o "Wall Art.shortcut"`.
