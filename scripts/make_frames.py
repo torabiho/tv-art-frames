@@ -264,7 +264,36 @@ for f in frames:
     else:
         catalog[f["name"]] = {"Standard": f}
 
-manifest = {"version": 3, "canvas": {"w": W, "h": H},
+# "Whole photo" (fit) mode. Mat variants draw on their no-mat sibling (moulding only) and the
+# shortcut paints the mat itself, sized to each photo; no-mat variants fill with a blurred copy.
+UI = os.path.join(OUT, "ui")
+os.makedirs(UI, exist_ok=True)
+srng = np.random.default_rng(11)          # separate stream: keeps the frame images unchanged
+Image.new("RGB", (8, 8), (252, 250, 245)).save(os.path.join(UI, "bevel.png"))
+
+
+def swatch(color, name):
+    a = np.ones((144, 256, 3), np.float32) * np.array(color, np.float32)
+    a += srng.standard_normal((144, 256, 1)).astype(np.float32) * 1.6
+    Image.fromarray(np.clip(a, 0, 255).astype(np.uint8)).save(os.path.join(UI, name), optimize=True)
+    return "ui/" + name
+
+
+def fit_of(entry, fill, mat_px=0, mat_file=""):
+    return {"file": entry["file"], "x": entry["x"], "y": entry["y"], "w": entry["w"], "h": entry["h"],
+            "fill": fill, "mat_px": mat_px, "mat_file": mat_file}
+
+
+SPECS = {f["name"]: f for f in FRAMES}
+for name, variants in catalog.items():
+    if "With mat" in variants and "No mat" in variants:
+        spec = WALNUT_MAT if name == "Floating Walnut" else SPECS[name]
+        sw = swatch(spec["mat_color"], "mat-" + spec["id"].replace("-mat", "") + ".png")
+        variants["With mat"]["fit"] = fit_of(variants["No mat"], "mat", spec["mat"], sw)
+    for v in variants.values():
+        v.setdefault("fit", fit_of(v, "blur"))
+
+manifest = {"version": 4, "canvas": {"w": W, "h": H},
             "frames": frames + list(no_mat.values()) + [walnut_mat],
             "by_name": {f["name"]: f for f in frames},   # kept for shortcut v7
             "catalog": catalog}

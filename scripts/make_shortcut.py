@@ -57,11 +57,123 @@ def getfile(path_text, out):
             setvar(out)]
 
 
+
+# ---------------------------------------------------------------- small builders
+def uid():
+    return str(uuid.uuid4()).upper()
+
+
+def if_start(g, var_name, cond, **cmp):
+    """cond: 2 = greater than (numbers, WFNumberValue), 4 = is (text: WFConditionalActionString / numbers: WFNumberValue)."""
+    return act("is.workflow.actions.conditional", WFInput={"Type": "Variable", "Variable": var(var_name)},
+               WFCondition=cond, GroupingIdentifier=g, WFControlFlowMode=0, **cmp)
+
+
+def if_else(g):
+    return act("is.workflow.actions.conditional", GroupingIdentifier=g, WFControlFlowMode=1)
+
+
+def if_end(g):
+    return act("is.workflow.actions.conditional", GroupingIdentifier=g, WFControlFlowMode=2)
+
+
+def math(inp, op, operand, out):
+    operand = text(("var", operand)) if isinstance(operand, str) else operand
+    return [act("is.workflow.actions.math", WFInput=var(inp), WFMathOperation=op, WFMathOperand=operand), setvar(out)]
+
+
+def resize(src, w, h, out):
+    tv = lambda v: text(("var", v)) if isinstance(v, str) and v != "Auto" else (v if isinstance(v, str) else str(v))
+    return [act("is.workflow.actions.image.resize", WFImage=var(src), WFInput=var(src),
+                WFImageResizeWidth=tv(w), WFImageResizeHeight=tv(h)), setvar(out)]
+
+
+def overlay(base, top, x, y, w, h, out, opacity="100"):
+    tv = lambda v: text(("var", v)) if isinstance(v, str) else str(v)
+    return [act("is.workflow.actions.overlayimageonimage", WFInput=var(base), WFImage=var(top),
+                WFShouldShowImageEditor=False, WFImagePosition="Custom",
+                WFImageX=tv(x), WFImageY=tv(y), WFImageWidth=tv(w), WFImageHeight=tv(h),
+                WFRotation="0", WFOverlayImageOpacity=opacity), setvar(out)]
+
+
+def img_prop(src, prop, out):
+    return [act("is.workflow.actions.properties.images", WFInput=var(src), WFContentItemPropertyName=prop),
+            setvar(out)]
+
+
+def use_frame(img, x, y, w, h):
+    """Which frame image and opening the finished photo goes into."""
+    return [setvar("CurImg", var(img)), setvar("CX", var(x)), setvar("CY", var(y)),
+            setvar("CW", var(w)), setvar("CH", var(h))]
+
+
+def blur_fill(w, h, out):
+    """Sdr zoomed to cover w x h, blurred (shrink + blend shifted copies), darkened -> out."""
+    a = []
+    a += math(w, "+", 112, "BgW") + math(h, "+", 112, "BgH")
+    a += resize("Sdr", "BgW", "Auto", "BgWide")
+    a += [act("is.workflow.actions.image.crop", WFInput=var("BgWide"), WFImageCropPosition="Center",
+              WFImageCropWidth=text(("var", "BgW")), WFImageCropHeight=text(("var", "BgH"))), setvar("BgCrop")]
+    a += resize("BgCrop", 30, "Auto", "BgTiny")
+    a += resize("BgTiny", "BgW", "BgH", "Soft")
+    for axis in ("x", "y"):
+        for sh in (8, 16, 32):
+            a += overlay("Soft", "Soft", sh if axis == "x" else 0, 0 if axis == "x" else sh, "BgW", "BgH",
+                         "Soft", opacity="50")
+    a += [act("is.workflow.actions.image.crop", WFInput=var("Soft"), WFImageCropPosition="Center",
+              WFImageCropWidth=text(("var", w)), WFImageCropHeight=text(("var", h))), setvar("BgBlur")]
+    a += overlay("BgBlur", "DimImage", 0, 0, w, h, out, opacity="60")
+    return a
+
+
+def whole_photo():
+    """Whole photo, no crop. Mat frames: painted mat + bevel on the moulding-only frame.
+    No-mat frames: blurred copy of the photo around it."""
+    g = uid()
+    a = [if_start(g, "Fill", 4, WFConditionalActionString="mat")]
+    # --- mat fill ---
+    a += geturl(text(f"{BASE_URL}/", ("var", "MatFile")), "Swatch")
+    a += resize("Swatch", "FitW", "FitH", "MatBg")
+    a += math("MatPx", "×", 2, "Mat2") + math("FitH", "-", "Mat2", "MainH")
+    a += resize("Sdr", "Auto", "MainH", "Main")
+    a += img_prop("Main", "Width", "MainW")
+    a += math("FitW", "-", "MainW", "SideGap") + math("SideGap", "÷", 2, "SideHalf")
+    a += [act("is.workflow.actions.round", WFInput=var("SideHalf"), WFRoundTo="Ones Place", WFRoundMode="Normal"),
+          setvar("MX")]
+    a += overlay("MatBg", "Main", "MX", "MatPx", "MainW", "MainH", "Comp")
+    # bevel: 5 px bright line around the photo
+    a += math("MX", "-", 5, "BvX") + math("MatPx", "-", 5, "BvY")
+    a += math("MainW", "+", 10, "BvW") + math("MainH", "+", 10, "BvH")
+    a += math("MX", "+", "MainW", "BvR") + math("MatPx", "+", "MainH", "BvB")
+    a += overlay("Comp", "BevelImage", "BvX", "BvY", 5, "BvH", "Comp")     # left
+    a += overlay("Comp", "BevelImage", "BvR", "BvY", 5, "BvH", "Comp")     # right
+    a += overlay("Comp", "BevelImage", "BvX", "BvY", "BvW", 5, "Comp")     # top
+    a += overlay("Comp", "BevelImage", "BvX", "BvB", "BvW", 5, "Comp")     # bottom
+    a += overlay("Comp", "Main", "MX", "MatPx", "MainW", "MainH", "Cropped")   # photo back on top of the lines
+    a += use_frame("FitImage", "FitX", "FitY", "FitW", "FitH")
+    a += [if_else(g)]
+    # --- blur fill (no-mat frames) ---
+    a += blur_fill("W", "H", "Bg")
+    a += resize("Sdr", "Auto", "H", "Main")
+    a += img_prop("Main", "Width", "MainW")
+    a += math("W", "-", "MainW", "SideGap") + math("SideGap", "÷", 2, "SideHalf")
+    a += [act("is.workflow.actions.round", WFInput=var("SideHalf"), WFRoundTo="Ones Place", WFRoundMode="Normal"),
+          setvar("MX")]
+    a += overlay("Bg", "Main", "MX", 0, "MainW", "H", "Cropped")
+    a += use_frame("FrameImage", "X", "Y", "W", "H")
+    a += [if_end(g)]
+    return a
+
+
+# ---------------------------------------------------------------- the shortcut
 actions = []
 actions += [act("is.workflow.actions.comment",
-                WFCommentActionText="Wall Art: pick a frame and photos, get framed 2048x1152 JPEGs to add to the TV Art shared album. Frames are downloaded from the TV Art Frames GitHub repo.")]
-# 1. frames.json -> dictionary
-actions += geturl(f"{BASE_URL}/frames.json", "ManifestFile")
+                WFCommentActionText="Wall Art: pick a frame and photos, get framed 2048x1152 JPEGs for the TV. "
+                                    "Frames are downloaded from the tv-art-frames GitHub repo.")]
+# 1. frames.json (random query string so GitHub/iOS caches never serve a stale copy)
+actions += [act("is.workflow.actions.number.random", WFRandomNumberMinimum=1, WFRandomNumberMaximum=999999999),
+            setvar("Nonce")]
+actions += geturl(text(f"{BASE_URL}/frames.json?t=", ("var", "Nonce")), "ManifestFile")
 actions += [act("is.workflow.actions.detect.dictionary", WFInput=var("ManifestFile")), setvar("Manifest")]
 actions += getkey("Manifest", "catalog", "Frames")
 # 2. choose frame
@@ -72,209 +184,98 @@ actions += [act("is.workflow.actions.choosefromlist", WFInput=var("FrameNames"),
 actions += [act("is.workflow.actions.getvalueforkey", WFInput=var("Frames"),
                 WFDictionaryKey=text(("var", "FrameName")), WFGetDictionaryValueType="Value"),
             setvar("Variants")]
-# 2b. mat choice; a frame with a single variant is picked automatically, no question shown
+# 2b. mat choice, only when the frame has more than one version
 actions += [act("is.workflow.actions.getvalueforkey", WFInput=var("Variants"),
                 WFGetDictionaryValueType="All Keys"), setvar("VariantNames")]
-# only ask when the frame really has a choice; a one-item list is still shown by iOS
-MAT = str(uuid.uuid4()).upper()
+MAT = uid()
 actions += [act("is.workflow.actions.count", WFCountType="Items", Input=var("VariantNames"), WFInput=var("VariantNames")),
             setvar("VariantCount"),
-            act("is.workflow.actions.conditional", WFInput={"Type": "Variable", "Variable": var("VariantCount")},
-                WFCondition=2, WFNumberValue=1, GroupingIdentifier=MAT, WFControlFlowMode=0),
+            if_start(MAT, "VariantCount", 2, WFNumberValue=1),
             act("is.workflow.actions.choosefromlist", WFInput=var("VariantNames"),
                 WFChooseFromListActionPrompt="With or without mat?"), setvar("VariantName"),
-            act("is.workflow.actions.conditional", GroupingIdentifier=MAT, WFControlFlowMode=1),
+            if_else(MAT),
             act("is.workflow.actions.getitemfromlist", WFInput=var("VariantNames"), WFItemSpecifier="First Item"),
             setvar("VariantName"),
-            act("is.workflow.actions.conditional", GroupingIdentifier=MAT, WFControlFlowMode=2)]
+            if_end(MAT)]
 actions += [act("is.workflow.actions.getvalueforkey", WFInput=var("Variants"),
                 WFDictionaryKey=text(("var", "VariantName")), WFGetDictionaryValueType="Value"),
             setvar("Frame")]
-for k, out in [("file", "FileName"), ("x", "X"), ("y", "Y"), ("w", "W"), ("h", "H"), ("id", "FrameId")]:
+for k, out in [("file", "FileName"), ("x", "X"), ("y", "Y"), ("w", "W"), ("h", "H"), ("id", "FrameId"),
+               ("fit", "Fit")]:
     actions += getkey("Frame", k, out)
+for k, out in [("file", "FitFile"), ("x", "FitX"), ("y", "FitY"), ("w", "FitW"), ("h", "FitH"),
+               ("fill", "Fill"), ("mat_px", "MatPx"), ("mat_file", "MatFile")]:
+    actions += getkey("Fit", k, out)
 # 3. load frame images
 actions += geturl(text(f"{BASE_URL}/frames/", ("var", "FileName")), "FrameImage")
+actions += geturl(text(f"{BASE_URL}/frames/", ("var", "FitFile")), "FitImage")
 actions += geturl(f"{BASE_URL}/ui/dim.png", "DimImage")
+actions += geturl(f"{BASE_URL}/ui/bevel.png", "BevelImage")
 # 4. pick photos
 actions += [act("is.workflow.actions.selectphoto", WFSelectMultiplePhotos=True), setvar("Photos")]
 # 5. loop
-grp = str(uuid.uuid4()).upper()
-ORIENT = str(uuid.uuid4()).upper()
+grp = uid()
+ORIENT = uid()
+PICK = uid()
 actions += [act("is.workflow.actions.repeat.each", WFInput=var("Photos"),
                 GroupingIdentifier=grp, WFControlFlowMode=0)]
-actions += [
-    # every frame window is wider than 16:9, so fit-to-width then centre-crop fills it
-    # HDR photos (10-bit HLG / Display P3) wash out when composited; flatten to an SDR JPEG first
-    act("is.workflow.actions.image.convert", WFInput=var("Repeat Item"), WFImageFormat="JPEG",
-        WFImageCompressionQuality=1.0, WFImagePreserveMetadata=False),
-    setvar("Sdr"),
-    # --- vertical or horizontal? ---
-    act("is.workflow.actions.properties.images", WFInput=var("Sdr"), WFContentItemPropertyName="Width"),
-    setvar("PhotoW"),
-    act("is.workflow.actions.properties.images", WFInput=var("Sdr"), WFContentItemPropertyName="Height"),
-    setvar("PhotoH"),
-    act("is.workflow.actions.math", WFInput=var("PhotoH"), WFMathOperation="-", WFMathOperand=text(("var", "PhotoW"))),
-    setvar("Diff"),
-    act("is.workflow.actions.conditional", WFInput={"Type": "Variable", "Variable": var("Diff")},
-        WFCondition=2, WFNumberValue=0, GroupingIdentifier=ORIENT, WFControlFlowMode=0),
-    # VERTICAL: whole photo, centred, over a blurred and darkened zoomed-in copy of itself.
-    # The background is built 112 px larger than the window, blurred, then centre-cropped,
-    # so the unblended edges left by the shifted copies fall outside the frame.
-    act("is.workflow.actions.math", WFInput=var("W"), WFMathOperation="+", WFMathOperand=112),
-    setvar("BgW"),
-    act("is.workflow.actions.math", WFInput=var("H"), WFMathOperation="+", WFMathOperand=112),
-    setvar("BgH"),
-    act("is.workflow.actions.image.resize", WFImage=var("Sdr"), WFInput=var("Sdr"),
-        WFImageResizeWidth=text(("var", "BgW")), WFImageResizeHeight="Auto"),
-    setvar("BgWide"),
-    act("is.workflow.actions.image.crop", WFInput=var("BgWide"), WFImageCropPosition="Center",
-        WFImageCropWidth=text(("var", "BgW")), WFImageCropHeight=text(("var", "BgH"))),
-    setvar("BgCrop"),
-    # Shortcuts has no blur: shrink to 30 px wide, scale back up (blocky),
-    # then average shifted copies of itself to smooth the blocks out.
-    act("is.workflow.actions.image.resize", WFImage=var("BgCrop"), WFInput=var("BgCrop"),
-        WFImageResizeWidth="30", WFImageResizeHeight="Auto"),
-    setvar("BgTiny"),
-    act("is.workflow.actions.image.resize", WFImage=var("BgTiny"), WFInput=var("BgTiny"),
-        WFImageResizeWidth=text(("var", "BgW")), WFImageResizeHeight=text(("var", "BgH"))),
-    setvar("Soft"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Soft"), WFImage=var("Soft"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX="8", WFImageY="0", WFImageWidth=text(("var", "BgW")), WFImageHeight=text(("var", "BgH")),
-        WFRotation="0", WFOverlayImageOpacity="50"),
-    setvar("Soft"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Soft"), WFImage=var("Soft"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX="16", WFImageY="0", WFImageWidth=text(("var", "BgW")), WFImageHeight=text(("var", "BgH")),
-        WFRotation="0", WFOverlayImageOpacity="50"),
-    setvar("Soft"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Soft"), WFImage=var("Soft"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX="32", WFImageY="0", WFImageWidth=text(("var", "BgW")), WFImageHeight=text(("var", "BgH")),
-        WFRotation="0", WFOverlayImageOpacity="50"),
-    setvar("Soft"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Soft"), WFImage=var("Soft"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX="0", WFImageY="8", WFImageWidth=text(("var", "BgW")), WFImageHeight=text(("var", "BgH")),
-        WFRotation="0", WFOverlayImageOpacity="50"),
-    setvar("Soft"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Soft"), WFImage=var("Soft"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX="0", WFImageY="16", WFImageWidth=text(("var", "BgW")), WFImageHeight=text(("var", "BgH")),
-        WFRotation="0", WFOverlayImageOpacity="50"),
-    setvar("Soft"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Soft"), WFImage=var("Soft"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX="0", WFImageY="32", WFImageWidth=text(("var", "BgW")), WFImageHeight=text(("var", "BgH")),
-        WFRotation="0", WFOverlayImageOpacity="50"),
-    setvar("Soft"),
-    act("is.workflow.actions.image.crop", WFInput=var("Soft"), WFImageCropPosition="Center",
-        WFImageCropWidth=text(("var", "W")), WFImageCropHeight=text(("var", "H"))),
-    setvar("BgBlur"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("BgBlur"), WFImage=var("DimImage"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX="0", WFImageY="0", WFImageWidth=text(("var", "W")), WFImageHeight=text(("var", "H")),
-        WFRotation="0", WFOverlayImageOpacity="60"),
-    setvar("Bg"),
-    act("is.workflow.actions.image.resize", WFImage=var("Sdr"), WFInput=var("Sdr"),
-        WFImageResizeWidth="Auto", WFImageResizeHeight=text(("var", "H"))),
-    setvar("Main"),
-    act("is.workflow.actions.properties.images", WFInput=var("Main"), WFContentItemPropertyName="Width"),
-    setvar("MainW"),
-    act("is.workflow.actions.math", WFInput=var("W"), WFMathOperation="-", WFMathOperand=text(("var", "MainW"))),
-    setvar("Gap"),
-    act("is.workflow.actions.math", WFInput=var("Gap"), WFMathOperation="\u00f7", WFMathOperand=2),
-    act("is.workflow.actions.round", WFRoundTo="Ones Place", WFRoundMode="Normal"),
-    setvar("MX"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Bg"), WFImage=var("Main"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX=text(("var", "MX")), WFImageY="0",
-        WFImageWidth=text(("var", "MainW")), WFImageHeight=text(("var", "H")),
-        WFRotation="0", WFOverlayImageOpacity="100"),
-    setvar("Cropped"),
-    act("is.workflow.actions.conditional", GroupingIdentifier=ORIENT, WFControlFlowMode=1),
-    # HORIZONTAL: fit to width, then the five crop options
-    act("is.workflow.actions.image.resize", WFImage=var("Sdr"), WFInput=var("Sdr"),
-        WFImageResizeWidth=text(("var", "W")), WFImageResizeHeight="Auto"),
-    setvar("Scaled"),
-    # --- five crop candidates from top to bottom; the user picks one by thumbnail ---
-    act("is.workflow.actions.properties.images", WFInput=var("Scaled"), WFContentItemPropertyName="Height"),
-    setvar("ScaledH"),
-    act("is.workflow.actions.math", WFInput=var("ScaledH"), WFMathOperation="-", WFMathOperand=text(("var", "H"))),
-    setvar("Extra"),
-    # darken the whole photo once; each option lays its crop back on top at full brightness
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Scaled"), WFImage=var("DimImage"),
-            WFShouldShowImageEditor=False, WFImagePosition="Custom",
-            WFImageX="0", WFImageY="0", WFImageWidth=text(("var", "W")), WFImageHeight=text(("var", "ScaledH")),
-            WFRotation="0", WFOverlayImageOpacity="100"),
-    setvar("Dimmed"),
-]
+# HDR photos wash out when composited; flatten to an SDR JPEG first
+actions += [act("is.workflow.actions.image.convert", WFInput=var("Repeat Item"), WFImageFormat="JPEG",
+                WFImageCompressionQuality=1.0, WFImagePreserveMetadata=False), setvar("Sdr")]
+actions += img_prop("Sdr", "Width", "PhotoW") + img_prop("Sdr", "Height", "PhotoH")
+actions += math("PhotoH", "-", "PhotoW", "Diff")
+actions += [if_start(ORIENT, "Diff", 2, WFNumberValue=0)]
+# ---- VERTICAL: always the whole photo
+actions += whole_photo()
+actions += [if_else(ORIENT)]
+# ---- HORIZONTAL: five crop options + "whole photo" as option 6
+actions += resize("Sdr", "W", "Auto", "Scaled")
+actions += img_prop("Scaled", "Height", "ScaledH") + math("ScaledH", "-", "H", "Extra")
+# darken the whole photo once; each crop option lays its band back on top at full brightness
+actions += overlay("Scaled", "DimImage", 0, 0, "W", "ScaledH", "Dimmed")
 for i, frac in enumerate([0, 0.25, 0.5, 0.75, 1.0], start=1):
-    actions += [
-        act("is.workflow.actions.math", WFInput=var("Extra"), WFMathOperation="×", WFMathOperand=frac),
-        act("is.workflow.actions.round", WFRoundTo="Ones Place", WFRoundMode="Normal"),
-        setvar("OffY"),
-        act("is.workflow.actions.image.crop", WFInput=var("Scaled"), WFImageCropPosition="Custom",
-            WFImageCropX="0", WFImageCropY=text(("var", "OffY")),
-            WFImageCropWidth=text(("var", "W")), WFImageCropHeight=text(("var", "H"))),
-        setvar("Piece"),
-        act("is.workflow.actions.overlayimageonimage", WFInput=var("Dimmed"), WFImage=var("Piece"),
-            WFShouldShowImageEditor=False, WFImagePosition="Custom",
-            WFImageX="0", WFImageY=text(("var", "OffY")), WFImageWidth=text(("var", "W")), WFImageHeight=text(("var", "H")),
-            WFRotation="0", WFOverlayImageOpacity="100"),
-        setvar("Preview"),
-        # tag the option in the image itself: option i is i pixels narrower than the window.
-        # (Names don't survive Choose from List; pixel sizes do.)
-        act("is.workflow.actions.math", WFInput=var("W"), WFMathOperation="-", WFMathOperand=i),
-        setvar("PW"),
-        act("is.workflow.actions.image.resize", WFImage=var("Preview"), WFInput=var("Preview"),
-            WFImageResizeWidth=text(("var", "PW")), WFImageResizeHeight="Auto"),
-        act("is.workflow.actions.setitemname", WFName=f"Option {i}", WFDontIncludeFileExtension=False),
-        setvar("Candidate"),
-        setvar("Choices", var("Candidate")) if i == 1 else
-        act("is.workflow.actions.appendvariable", WFInput=var("Candidate"), WFVariableName="Choices"),
-    ]
-actions += [
-    act("is.workflow.actions.choosefromlist", WFInput=var("Choices"),
-        WFChooseFromListActionPrompt="Pick the crop that fits best"),
-    setvar("Chosen"),
-    act("is.workflow.actions.properties.images", WFInput=var("Chosen"), WFContentItemPropertyName="Width"),
-    setvar("ChosenW"),
-    act("is.workflow.actions.math", WFInput=var("W"), WFMathOperation="-", WFMathOperand=text(("var", "ChosenW"))),
-    setvar("Idx"),
-    act("is.workflow.actions.math", WFInput=var("Idx"), WFMathOperation="-", WFMathOperand=1),
-    setvar("Step"),
-    act("is.workflow.actions.math", WFInput=var("Step"), WFMathOperation="\u00d7", WFMathOperand=text(("var", "Extra"))),
-    setvar("Scaled4"),
-    act("is.workflow.actions.math", WFInput=var("Scaled4"), WFMathOperation="\u00f7", WFMathOperand=4),
-    act("is.workflow.actions.round", WFRoundTo="Ones Place", WFRoundMode="Normal"),
-    setvar("FinalY"),
-    act("is.workflow.actions.image.crop", WFInput=var("Scaled"), WFImageCropPosition="Custom",
-        WFImageCropX="0", WFImageCropY=text(("var", "FinalY")),
-        WFImageCropWidth=text(("var", "W")), WFImageCropHeight=text(("var", "H"))),
-    setvar("Cropped"),
-    act("is.workflow.actions.conditional", GroupingIdentifier=ORIENT, WFControlFlowMode=2),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("FrameImage"), WFImage=var("Cropped"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX=text(("var", "X")), WFImageY=text(("var", "Y")),
-        WFImageWidth=text(("var", "W")), WFImageHeight=text(("var", "H")),
-        WFRotation="0", WFOverlayImageOpacity="100"),
-    setvar("Framed"),
-    act("is.workflow.actions.overlayimageonimage", WFInput=var("Framed"), WFImage=var("FrameImage"),
-        WFShouldShowImageEditor=False, WFImagePosition="Custom",
-        WFImageX="0", WFImageY="0", WFImageWidth=str(CANVAS_W), WFImageHeight=str(CANVAS_H),
-        WFRotation="0", WFOverlayImageOpacity="100"),
-    setvar("Finished"),
-    act("is.workflow.actions.image.convert", WFInput=var("Finished"), WFImageFormat="JPEG",
-        WFImageCompressionQuality=0.9, WFImagePreserveMetadata=False),
-    setvar("Jpeg"),
-    act("is.workflow.actions.setitemname", WFInput=var("Jpeg"),
-        WFName=text("TVArt-", ("var", "FrameId")), WFDontIncludeFileExtension=False),
-    setvar("Named"),
-    act("is.workflow.actions.appendvariable", WFInput=var("Named"), WFVariableName="Results"),
-]
+    actions += [act("is.workflow.actions.math", WFInput=var("Extra"), WFMathOperation="×", WFMathOperand=frac),
+                act("is.workflow.actions.round", WFRoundTo="Ones Place", WFRoundMode="Normal"), setvar("OffY"),
+                act("is.workflow.actions.image.crop", WFInput=var("Scaled"), WFImageCropPosition="Custom",
+                    WFImageCropX="0", WFImageCropY=text(("var", "OffY")),
+                    WFImageCropWidth=text(("var", "W")), WFImageCropHeight=text(("var", "H"))),
+                setvar("Piece")]
+    actions += overlay("Dimmed", "Piece", 0, "OffY", "W", "H", "Preview")
+    # tag the option in the image itself: option i is i pixels narrower than the window
+    # (names don't survive Choose from List; pixel sizes do)
+    actions += math("W", "-", i, "PW") + resize("Preview", "PW", "Auto", "Candidate")
+    actions += [setvar("Choices", var("Candidate")) if i == 1 else
+                act("is.workflow.actions.appendvariable", WFInput=var("Candidate"), WFVariableName="Choices")]
+# option 6: the whole photo, undimmed
+actions += math("W", "-", 6, "PW") + resize("Scaled", "PW", "Auto", "Candidate")
+actions += [act("is.workflow.actions.appendvariable", WFInput=var("Candidate"), WFVariableName="Choices")]
+actions += [act("is.workflow.actions.choosefromlist", WFInput=var("Choices"),
+                WFChooseFromListActionPrompt="Pick a crop (last one = whole photo)"), setvar("Chosen")]
+actions += img_prop("Chosen", "Width", "ChosenW") + math("W", "-", "ChosenW", "Idx")
+actions += [if_start(PICK, "Idx", 4, WFNumberValue=6)]
+actions += whole_photo()
+actions += [if_else(PICK)]
+actions += math("Idx", "-", 1, "Step") + math("Step", "×", "Extra", "Scaled4")
+actions += [act("is.workflow.actions.math", WFInput=var("Scaled4"), WFMathOperation="÷", WFMathOperand=4),
+            act("is.workflow.actions.round", WFRoundTo="Ones Place", WFRoundMode="Normal"), setvar("FinalY"),
+            act("is.workflow.actions.image.crop", WFInput=var("Scaled"), WFImageCropPosition="Custom",
+                WFImageCropX="0", WFImageCropY=text(("var", "FinalY")),
+                WFImageCropWidth=text(("var", "W")), WFImageCropHeight=text(("var", "H"))),
+            setvar("Cropped")]
+actions += use_frame("FrameImage", "X", "Y", "W", "H")
+actions += [if_end(PICK)]
+actions += [if_end(ORIENT)]
+# ---- put it in the frame
+actions += overlay("CurImg", "Cropped", "CX", "CY", "CW", "CH", "Framed")
+actions += overlay("Framed", "CurImg", 0, 0, CANVAS_W, CANVAS_H, "Finished")
+actions += [act("is.workflow.actions.image.convert", WFInput=var("Finished"), WFImageFormat="JPEG",
+                WFImageCompressionQuality=0.9, WFImagePreserveMetadata=False), setvar("Jpeg"),
+            act("is.workflow.actions.setitemname", WFInput=var("Jpeg"),
+                WFName=text("TVArt-", ("var", "FrameId")), WFDontIncludeFileExtension=False),
+            setvar("Named"),
+            act("is.workflow.actions.appendvariable", WFInput=var("Named"), WFVariableName="Results")]
 actions += [act("is.workflow.actions.repeat.each", GroupingIdentifier=grp, WFControlFlowMode=2)]
-# 6. hand back
+# 6. preview
 actions += [act("is.workflow.actions.previewdocument", WFInput=var("Results"))]
 # 7. optional save; using the shortcut's own save step makes iOS ask for Photos permission the first time
 actions += [act("is.workflow.actions.gettext", WFTextActionText="Save to Photos\nDone"),

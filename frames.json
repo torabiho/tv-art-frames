@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "canvas": {
     "w": 2048,
     "h": 1152
@@ -12,7 +12,17 @@
       "x": 94,
       "y": 94,
       "w": 1860,
-      "h": 964
+      "h": 964,
+      "fit": {
+        "file": "gallery-black-no-mat.png",
+        "x": 30,
+        "y": 30,
+        "w": 1988,
+        "h": 1092,
+        "fill": "mat",
+        "mat_px": 64,
+        "mat_file": "ui/mat-gallery-black.png"
+      }
     },
     {
       "id": "natural-oak",
@@ -21,7 +31,17 @@
       "x": 108,
       "y": 108,
       "w": 1832,
-      "h": 936
+      "h": 936,
+      "fit": {
+        "file": "natural-oak-no-mat.png",
+        "x": 48,
+        "y": 48,
+        "w": 1952,
+        "h": 1056,
+        "fill": "mat",
+        "mat_px": 60,
+        "mat_file": "ui/mat-natural-oak.png"
+      }
     },
     {
       "id": "classic-gold",
@@ -30,7 +50,17 @@
       "x": 104,
       "y": 104,
       "w": 1840,
-      "h": 944
+      "h": 944,
+      "fit": {
+        "file": "classic-gold-no-mat.png",
+        "x": 60,
+        "y": 60,
+        "w": 1928,
+        "h": 1032,
+        "fill": "mat",
+        "mat_px": 44,
+        "mat_file": "ui/mat-classic-gold.png"
+      }
     },
     {
       "id": "floating-walnut",
@@ -39,7 +69,17 @@
       "x": 40,
       "y": 40,
       "w": 1968,
-      "h": 1072
+      "h": 1072,
+      "fit": {
+        "file": "floating-walnut.png",
+        "x": 40,
+        "y": 40,
+        "w": 1968,
+        "h": 1072,
+        "fill": "blur",
+        "mat_px": 0,
+        "mat_file": ""
+      }
     },
     {
       "id": "gallery-black-no-mat",
@@ -48,7 +88,17 @@
       "x": 30,
       "y": 30,
       "w": 1988,
-      "h": 1092
+      "h": 1092,
+      "fit": {
+        "file": "gallery-black-no-mat.png",
+        "x": 30,
+        "y": 30,
+        "w": 1988,
+        "h": 1092,
+        "fill": "blur",
+        "mat_px": 0,
+        "mat_file": ""
+      }
     },
     {
       "id": "natural-oak-no-mat",
@@ -57,7 +107,17 @@
       "x": 48,
       "y": 48,
       "w": 1952,
-      "h": 1056
+      "h": 1056,
+      "fit": {
+        "file": "natural-oak-no-mat.png",
+        "x": 48,
+        "y": 48,
+        "w": 1952,
+        "h": 1056,
+        "fill": "blur",
+        "mat_px": 0,
+        "mat_file": ""
+      }
     },
     {
       "id": "classic-gold-no-mat",
@@ -66,7 +126,17 @@
       "x": 60,
       "y": 60,
       "w": 1928,
-      "h": 1032
+      "h": 1032,
+      "fit": {
+        "file": "classic-gold-no-mat.png",
+        "x": 60,
+        "y": 60,
+        "w": 1928,
+        "h": 1032,
+        "fill": "blur",
+        "mat_px": 0,
+        "mat_file": ""
+      }
     },
     {
       "id": "floating-walnut-mat",
@@ -75,7 +145,17 @@
       "x": 86,
       "y": 86,
       "w": 1876,
-      "h": 980
+      "h": 980,
+      "fit": {
+        "file": "floating-walnut.png",
+        "x": 40,
+        "y": 40,
+        "w": 1968,
+        "h": 1072,
+        "fill": "mat",
+        "mat_px": 60,
+        "mat_file": "ui/mat-floating-walnut.png"
+      }
     }
   ],
   "by_name": {
@@ -86,7 +166,17 @@
       "x": 94,
       "y": 94,
       "w": 1860,
-      "h": 964
+      "h": 964,
+      "fit": {
+        "file": "gallery-black-no-mat.png",
+        "x": 30,
+        "y": 30,
+        "w": 1988,
+        "h": 1092,
+        "fill": "mat",
+        "mat_px": 64,
+        "mat_file": "ui/mat-gallery-black.png"
+      }
     },
     "Natural Oak": {
       "id": "natural-oak",
@@ -95,7 +185,17 @@
       "x": 108,
       "y": 108,
       "w": 1832,
-      "h": 936
+      "h": 936,
+      "fit": {
+        "file": "natural-oak-no-mat.png",
+        "x": 48,
+        "y": 48,
+        "w": 1952,
+        "h": 1056,
+        "fill": "mat",
+        "mat_px": 60,
+        "mat_file": "ui/mat-natural-oak.png"
+      }
     },
     "Classic Gold": {
       "id": "classic-gold",
@@ -104,7 +204,17 @@
       "x": 104,
       "y": 104,
       "w": 1840,
-      "h": 944
+      "h": 944,
+      "fit": {
+        "file": "classic-gold-no-mat.png",
+        "x": 60,
+        "y": 60,
+        "w": 1928,
+        "h": 1032,
+        "fill": "mat",
+        "mat_px": 44,
+        "mat_file": "ui/mat-classic-gold.png"
+      }
     },
     "Floating Walnut": {
       "id": "floating-walnut",
@@ -113,7 +223,17 @@
       "x": 40,
       "y": 40,
       "w": 1968,
-      "h": 1072
+      "h": 1072,
+      "fit": {
+        "file": "floating-walnut.png",
+        "x": 40,
+        "y": 40,
+        "w": 1968,
+        "h": 1072,
+        "fill": "blur",
+        "mat_px": 0,
+        "mat_file": ""
+      }
     }
   },
   "catalog": {
@@ -125,7 +245,17 @@
         "x": 94,
         "y": 94,
         "w": 1860,
-        "h": 964
+        "h": 964,
+        "fit": {
+          "file": "gallery-black-no-mat.png",
+          "x": 30,
+          "y": 30,
+          "w": 1988,
+          "h": 1092,
+          "fill": "mat",
+          "mat_px": 64,
+          "mat_file": "ui/mat-gallery-black.png"
+        }
       },
       "No mat": {
         "id": "gallery-black-no-mat",
@@ -134,7 +264,17 @@
         "x": 30,
         "y": 30,
         "w": 1988,
-        "h": 1092
+        "h": 1092,
+        "fit": {
+          "file": "gallery-black-no-mat.png",
+          "x": 30,
+          "y": 30,
+          "w": 1988,
+          "h": 1092,
+          "fill": "blur",
+          "mat_px": 0,
+          "mat_file": ""
+        }
       }
     },
     "Natural Oak": {
@@ -145,7 +285,17 @@
         "x": 108,
         "y": 108,
         "w": 1832,
-        "h": 936
+        "h": 936,
+        "fit": {
+          "file": "natural-oak-no-mat.png",
+          "x": 48,
+          "y": 48,
+          "w": 1952,
+          "h": 1056,
+          "fill": "mat",
+          "mat_px": 60,
+          "mat_file": "ui/mat-natural-oak.png"
+        }
       },
       "No mat": {
         "id": "natural-oak-no-mat",
@@ -154,7 +304,17 @@
         "x": 48,
         "y": 48,
         "w": 1952,
-        "h": 1056
+        "h": 1056,
+        "fit": {
+          "file": "natural-oak-no-mat.png",
+          "x": 48,
+          "y": 48,
+          "w": 1952,
+          "h": 1056,
+          "fill": "blur",
+          "mat_px": 0,
+          "mat_file": ""
+        }
       }
     },
     "Classic Gold": {
@@ -165,7 +325,17 @@
         "x": 104,
         "y": 104,
         "w": 1840,
-        "h": 944
+        "h": 944,
+        "fit": {
+          "file": "classic-gold-no-mat.png",
+          "x": 60,
+          "y": 60,
+          "w": 1928,
+          "h": 1032,
+          "fill": "mat",
+          "mat_px": 44,
+          "mat_file": "ui/mat-classic-gold.png"
+        }
       },
       "No mat": {
         "id": "classic-gold-no-mat",
@@ -174,7 +344,17 @@
         "x": 60,
         "y": 60,
         "w": 1928,
-        "h": 1032
+        "h": 1032,
+        "fit": {
+          "file": "classic-gold-no-mat.png",
+          "x": 60,
+          "y": 60,
+          "w": 1928,
+          "h": 1032,
+          "fill": "blur",
+          "mat_px": 0,
+          "mat_file": ""
+        }
       }
     },
     "Floating Walnut": {
@@ -185,7 +365,17 @@
         "x": 86,
         "y": 86,
         "w": 1876,
-        "h": 980
+        "h": 980,
+        "fit": {
+          "file": "floating-walnut.png",
+          "x": 40,
+          "y": 40,
+          "w": 1968,
+          "h": 1072,
+          "fill": "mat",
+          "mat_px": 60,
+          "mat_file": "ui/mat-floating-walnut.png"
+        }
       },
       "No mat": {
         "id": "floating-walnut",
@@ -194,7 +384,17 @@
         "x": 40,
         "y": 40,
         "w": 1968,
-        "h": 1072
+        "h": 1072,
+        "fit": {
+          "file": "floating-walnut.png",
+          "x": 40,
+          "y": 40,
+          "w": 1968,
+          "h": 1072,
+          "fill": "blur",
+          "mat_px": 0,
+          "mat_file": ""
+        }
       }
     }
   }
