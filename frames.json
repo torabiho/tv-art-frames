@@ -67,6 +67,15 @@
       "y": 60,
       "w": 1928,
       "h": 1032
+    },
+    {
+      "id": "floating-walnut-mat",
+      "name": "Floating Walnut",
+      "file": "floating-walnut-mat.png",
+      "x": 86,
+      "y": 86,
+      "w": 1876,
+      "h": 980
     }
   ],
   "by_name": {
@@ -169,7 +178,16 @@
       }
     },
     "Floating Walnut": {
-      "Standard": {
+      "With mat": {
+        "id": "floating-walnut-mat",
+        "name": "Floating Walnut",
+        "file": "floating-walnut-mat.png",
+        "x": 86,
+        "y": 86,
+        "w": 1876,
+        "h": 980
+      },
+      "No mat": {
         "id": "floating-walnut",
         "name": "Floating Walnut",
         "file": "floating-walnut.png",

@@ -245,8 +245,13 @@ def build(f):
 NO_MAT = [dict(f, id=f["id"] + "-no-mat", mat=0, gap=0, lip=True, win=edge_win(f["mould"], 0))
           for f in FRAMES if f["mat"]]
 
+# Floating Walnut has no mat by design; give it a matted sibling so every frame offers both.
+WALNUT_MAT = dict(FRAMES[3], id="floating-walnut-mat", mat=60, gap=0,
+                  win=edge_win(FRAMES[3]["mould"], 60), mat_color=(242, 238, 228))
+
 frames = [build(f) for f in FRAMES]
 no_mat = {f["name"]: build(dict(f)) for f in NO_MAT}
+walnut_mat = build(WALNUT_MAT)   # built last so the other frames' texture noise stays identical
 
 # catalog: frame name -> variant name -> frame entry (read by shortcut v8+).
 # A frame with one variant makes the shortcut skip the mat question automatically.
@@ -254,11 +259,13 @@ catalog = {}
 for f in frames:
     if f["name"] in no_mat:
         catalog[f["name"]] = {"With mat": f, "No mat": no_mat[f["name"]]}
+    elif f["id"] == "floating-walnut":
+        catalog[f["name"]] = {"With mat": walnut_mat, "No mat": f}
     else:
         catalog[f["name"]] = {"Standard": f}
 
 manifest = {"version": 3, "canvas": {"w": W, "h": H},
-            "frames": frames + list(no_mat.values()),
+            "frames": frames + list(no_mat.values()) + [walnut_mat],
             "by_name": {f["name"]: f for f in frames},   # kept for shortcut v7
             "catalog": catalog}
 with open(os.path.join(OUT, "frames.json"), "w") as fh:
