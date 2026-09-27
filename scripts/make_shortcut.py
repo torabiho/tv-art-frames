@@ -84,6 +84,7 @@ for k, out in [("file", "FileName"), ("x", "X"), ("y", "Y"), ("w", "W"), ("h", "
     actions += getkey("Frame", k, out)
 # 3. load frame images
 actions += geturl(text(f"{BASE_URL}/frames/", ("var", "FileName")), "FrameImage")
+actions += geturl(f"{BASE_URL}/ui/dim.png", "DimImage")
 # 4. pick photos
 actions += [act("is.workflow.actions.selectphoto", WFSelectMultiplePhotos=True), setvar("Photos")]
 # 5. loop
@@ -104,6 +105,12 @@ actions += [
     setvar("ScaledH"),
     act("is.workflow.actions.math", WFInput=var("ScaledH"), WFMathOperation="-", WFMathOperand=text(("var", "H"))),
     setvar("Extra"),
+    # darken the whole photo once; each option lays its crop back on top at full brightness
+    act("is.workflow.actions.overlayimageonimage", WFInput=var("Scaled"), WFImage=var("DimImage"),
+            WFShouldShowImageEditor=False, WFImagePosition="Custom",
+            WFImageX="0", WFImageY="0", WFImageWidth=text(("var", "W")), WFImageHeight=text(("var", "ScaledH")),
+            WFRotation="0", WFOverlayImageOpacity="100"),
+    setvar("Dimmed"),
 ]
 for i, frac in enumerate([0, 0.25, 0.5, 0.75, 1.0], start=1):
     actions += [
@@ -113,6 +120,11 @@ for i, frac in enumerate([0, 0.25, 0.5, 0.75, 1.0], start=1):
         act("is.workflow.actions.image.crop", WFInput=var("Scaled"), WFImageCropPosition="Custom",
             WFImageCropX="0", WFImageCropY=text(("var", "OffY")),
             WFImageCropWidth=text(("var", "W")), WFImageCropHeight=text(("var", "H"))),
+        setvar("Piece"),
+        act("is.workflow.actions.overlayimageonimage", WFInput=var("Dimmed"), WFImage=var("Piece"),
+            WFShouldShowImageEditor=False, WFImagePosition="Custom",
+            WFImageX="0", WFImageY=text(("var", "OffY")), WFImageWidth=text(("var", "W")), WFImageHeight=text(("var", "H")),
+            WFRotation="0", WFOverlayImageOpacity="100"),
         act("is.workflow.actions.setitemname", WFName=f"Option {i}", WFDontIncludeFileExtension=False),
         setvar("Candidate"),
         setvar("Choices", var("Candidate")) if i == 1 else
@@ -121,6 +133,20 @@ for i, frac in enumerate([0, 0.25, 0.5, 0.75, 1.0], start=1):
 actions += [
     act("is.workflow.actions.choosefromlist", WFInput=var("Choices"),
         WFChooseFromListActionPrompt="Pick the crop that fits best"),
+    setvar("Chosen"),
+    act("is.workflow.actions.getitemname", WFInput=var("Chosen")),
+    act("is.workflow.actions.text.replace", WFReplaceTextFind="Option ", WFReplaceTextReplace=""),
+    setvar("Idx"),
+    act("is.workflow.actions.math", WFInput=var("Idx"), WFMathOperation="-", WFMathOperand=1),
+    setvar("Step"),
+    act("is.workflow.actions.math", WFInput=var("Step"), WFMathOperation="\u00d7", WFMathOperand=text(("var", "Extra"))),
+    setvar("Scaled4"),
+    act("is.workflow.actions.math", WFInput=var("Scaled4"), WFMathOperation="\u00f7", WFMathOperand=4),
+    act("is.workflow.actions.round", WFRoundTo="Ones Place", WFRoundMode="Normal"),
+    setvar("FinalY"),
+    act("is.workflow.actions.image.crop", WFInput=var("Scaled"), WFImageCropPosition="Custom",
+        WFImageCropX="0", WFImageCropY=text(("var", "FinalY")),
+        WFImageCropWidth=text(("var", "W")), WFImageCropHeight=text(("var", "H"))),
     setvar("Cropped"),
     act("is.workflow.actions.overlayimageonimage", WFInput=var("FrameImage"), WFImage=var("Cropped"),
         WFShouldShowImageEditor=False, WFImagePosition="Custom",
@@ -149,7 +175,7 @@ actions += [act("is.workflow.actions.previewdocument", WFInput=var("Results"))]
 for i, a in enumerate(actions):
     p = a["WFWorkflowActionParameters"]
     if a["WFWorkflowActionIdentifier"] in ("is.workflow.actions.setvariable", "is.workflow.actions.round",
-                                           "is.workflow.actions.setitemname") and "WFInput" not in p:
+                                           "is.workflow.actions.setitemname", "is.workflow.actions.text.replace") and "WFInput" not in p:
         prev = actions[i - 1]["WFWorkflowActionParameters"]
         prev.setdefault("UUID", str(uuid.uuid4()).upper())
         p["WFInput"] = {"Value": {"Type": "ActionOutput", "OutputUUID": prev["UUID"],

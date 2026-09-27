@@ -10,6 +10,10 @@ The shortcut downloads `frames.json` and the PNGs in `frames/` from this repo ea
 - The frame and mat are opaque. The photo window is see-through, apart from a soft inner shadow.
 - `frames.json` lists each frame's name, file, and window position (`x`, `y`, `w`, `h` in pixels). `catalog` groups them as frame → variant (for example "With mat" / "No mat") and is what the shortcut reads; a frame with one variant skips the mat question. `by_name` is kept for older shortcut versions.
 
+## Other files
+
+- `ui/dim.png` is a semi-transparent black layer the shortcut uses to darken the parts of a photo a crop option leaves out.
+
 ## Adding a frame
 
 1. Add the PNG to `frames/`.
