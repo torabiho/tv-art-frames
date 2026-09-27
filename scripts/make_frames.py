@@ -192,7 +192,7 @@ FRAMES = [
          win=edge_win(60, 44), mat=44, mould=60, mat_color=(238, 232, 218),
          profile=gold_profile, texture=None),
     dict(id="floating-walnut", name="Floating Walnut", wall=(236, 233, 227),
-         win=edge_win(26, 14), mat=0, gap=14, mould=26, mat_color=None,
+         win=edge_win(26, 6), mat=0, gap=6, mould=26, mat_color=None,
          profile=walnut_profile, texture=walnut_texture),
 ]
 
