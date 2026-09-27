@@ -268,7 +268,7 @@ def paint_baroque(img, width):
 
 
 # ============================================================== build
-def build(fid, mould, mat, painter, mat_color, path, shadow_nomat=(18, 0.40)):
+def build(fid, mould, mat, painter, mat_color, path, shadow_nomat=(10, 0.22)):
     img = np.zeros((H, W, 3), np.float32)
     img = painter(img, mould)
     b = mould + mat
@@ -294,4 +294,4 @@ if __name__ == "__main__":
     print(build("rustic-antique", 72, 0, rustic, None, os.path.join(OUT, "rustic-antique-no-mat.png")))
     print(build("baroque-black", 120, 48, paint_baroque, (240, 236, 226), os.path.join(OUT, "baroque-black.png")))
     print(build("baroque-black", 120, 0, paint_baroque, None, os.path.join(OUT, "baroque-black-no-mat.png"),
-                shadow_nomat=(22, 0.45)))
+                shadow_nomat=(12, 0.26)))

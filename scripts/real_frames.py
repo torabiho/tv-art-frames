@@ -160,7 +160,7 @@ def paint_moulding(img, width, profile, depth, finish, tex=None, finish_px=None)
     return img
 
 
-def paper_mat(img, mat_box, win, color, bevel=7):
+def paper_mat(img, mat_box, win, color, bevel=5):
     x0, y0, x1, y1 = mat_box
     rng = np.random.default_rng(3)
     m = (XX >= x0) & (XX < x1) & (YY >= y0) & (YY < y1)
@@ -170,7 +170,7 @@ def paper_mat(img, mat_box, win, color, bevel=7):
     paper = np.array(color, np.float32) + (grain + fibre + blotch)[..., None]
     img[m] = paper[m]
     dl, dt, dr, db = XX - x0, YY - y0, x1 - XX, y1 - YY
-    sh = np.exp(-dt / 14) * 0.30 + np.exp(-dl / 14) * 0.22 + np.exp(-db / 6) * 0.08 + np.exp(-dr / 6) * 0.10
+    sh = np.exp(-dt / 12) * 0.22 + np.exp(-dl / 12) * 0.16 + np.exp(-db / 5) * 0.05 + np.exp(-dr / 5) * 0.06
     img *= (1 - np.clip(sh, 0, 0.45) * m)[..., None]
     wx0, wy0, wx1, wy1 = win
     bm, bd, bs, bmitre = ring((wx0 - bevel, wy0 - bevel, wx1 + bevel, wy1 + bevel), bevel)
@@ -179,10 +179,10 @@ def paper_mat(img, mat_box, win, color, bevel=7):
     for s, (fx, fy) in face.items():
         nv = np.array([fx, fy, 0.7], np.float32)
         nv /= np.linalg.norm(nv)
-        lum[bs == s] = 0.72 + 0.34 * max(0.0, float(nv @ LIGHT))
-    bcol = np.array([252, 250, 244], np.float32) * lum[..., None]
-    bcol *= (1 - np.exp(-(bmitre / 0.6) ** 2) * 0.12)[..., None]
-    bcol *= (1 - np.exp(-((bd - (bevel - 0.5)) / 0.6) ** 2) * 0.18)[..., None]
+        lum[bs == s] = 0.965 + 0.035 * max(0.0, float(nv @ LIGHT))  # a cut edge, not an embossed button
+    bcol = (np.array(color, np.float32) * 0.15 + np.array([255, 253, 248], np.float32) * 0.85) * lum[..., None]
+    bcol *= (1 - np.exp(-(bmitre / 0.6) ** 2) * 0.05)[..., None]
+    bcol *= (1 - np.exp(-((bd - (bevel - 0.5)) / 0.6) ** 2) * 0.06)[..., None]
     img[bm] = bcol[bm]
     return img
 
@@ -195,7 +195,7 @@ def floater_gap(img, box, win):
     return img
 
 
-def inner_shadow(win, depth=26, strength=0.42):
+def inner_shadow(win, depth=7, strength=0.16):
     x0, y0, x1, y1 = win
     inside = ((XX >= x0) & (XX < x1) & (YY >= y0) & (YY < y1)).astype(np.float32)
     dt, dl = np.clip(YY - y0, 0, None), np.clip(XX - x0, 0, None)
@@ -215,9 +215,9 @@ def build(name, mould, mat, gap, spec, path):
         sh = inner_shadow(win)
     elif gap:
         img = floater_gap(img, (mould, mould, W - mould, H - mould), win)
-        sh = inner_shadow(win, depth=8, strength=0.22)
+        sh = inner_shadow(win, depth=5, strength=0.14)
     else:
-        sh = inner_shadow(win, depth=16, strength=0.38)
+        sh = inner_shadow(win, depth=10, strength=0.22)
     rgba = np.dstack([np.clip(img, 0, 255), np.full((H, W), 255, np.float32)])
     wm = (XX >= win[0]) & (XX < win[2]) & (YY >= win[1]) & (YY < win[3])
     rgba[wm] = 0
