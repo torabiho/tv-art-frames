@@ -194,6 +194,13 @@ FRAMES = [
     dict(id="floating-walnut", name="Floating Walnut", wall=(236, 233, 227),
          win=edge_win(26, 6), mat=0, gap=6, mould=26, mat_color=None,
          profile=walnut_profile, texture=walnut_texture),
+    # textured renders come from new_frames.py; the entries here define geometry, mat and names
+    dict(id="rustic-antique", name="Rustic Antique", wall=(230, 224, 214),
+         win=edge_win(72, 64), mat=64, mould=72, mat_color=(236, 226, 204),
+         profile=walnut_profile, texture=walnut_texture),
+    dict(id="baroque-black", name="Baroque Black", wall=(230, 226, 220),
+         win=edge_win(120, 48), mat=48, mould=120, mat_color=(240, 236, 226),
+         profile=black_profile, texture=None),
 ]
 
 
@@ -246,7 +253,7 @@ NO_MAT = [dict(f, id=f["id"] + "-no-mat", mat=0, gap=0, lip=True, win=edge_win(f
           for f in FRAMES if f["mat"]]
 
 # Floating Walnut has no mat by design; give it a matted sibling so every frame offers both.
-WALNUT_MAT = dict(FRAMES[3], id="floating-walnut-mat", mat=60, gap=0,
+WALNUT_MAT = dict(next(f for f in FRAMES if f["id"] == "floating-walnut"), id="floating-walnut-mat", mat=60, gap=0,
                   win=edge_win(FRAMES[3]["mould"], 60), mat_color=(242, 238, 228))
 
 frames = [build(f) for f in FRAMES]

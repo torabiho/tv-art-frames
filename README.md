@@ -24,6 +24,7 @@ The shortcut downloads `frames.json` and the PNGs in `frames/` from this repo ea
 ## Scripts
 
 - `scripts/real_frames.py` renders the frame images (photo-textured, lit mouldings). It needs CC0 wood textures from [Poly Haven](https://polyhaven.com) in `scripts/tex/`: `oak_veneer_01.jpg`, `ash_veneer.jpg`, `walnut_veneer_02.jpg` (2k diffuse). Geometry matches `make_frames.py`, so `frames.json` is unchanged.
+- `scripts/new_frames.py` renders Rustic Antique (needs `wood_cabinet_worn_long.jpg` from Poly Haven) and Baroque Black (carved ornament built as a height map, lit as black lacquer).
 
 - `scripts/make_frames.py` draws the starter frames and writes `frames.json`.
 - `scripts/make_shortcut.py` builds the unsigned shortcut. Set `FRAMES_URL` to this repo's raw URL, then sign it on a Mac with

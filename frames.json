@@ -82,6 +82,44 @@
       }
     },
     {
+      "id": "rustic-antique",
+      "name": "Rustic Antique",
+      "file": "rustic-antique.png",
+      "x": 136,
+      "y": 136,
+      "w": 1776,
+      "h": 880,
+      "fit": {
+        "file": "rustic-antique-no-mat.png",
+        "x": 72,
+        "y": 72,
+        "w": 1904,
+        "h": 1008,
+        "fill": "mat",
+        "mat_px": 64,
+        "mat_file": "ui/mat-rustic-antique.png"
+      }
+    },
+    {
+      "id": "baroque-black",
+      "name": "Baroque Black",
+      "file": "baroque-black.png",
+      "x": 168,
+      "y": 168,
+      "w": 1712,
+      "h": 816,
+      "fit": {
+        "file": "baroque-black-no-mat.png",
+        "x": 120,
+        "y": 120,
+        "w": 1808,
+        "h": 912,
+        "fill": "mat",
+        "mat_px": 48,
+        "mat_file": "ui/mat-baroque-black.png"
+      }
+    },
+    {
       "id": "gallery-black-no-mat",
       "name": "Gallery Black",
       "file": "gallery-black-no-mat.png",
@@ -133,6 +171,44 @@
         "y": 60,
         "w": 1928,
         "h": 1032,
+        "fill": "blur",
+        "mat_px": 0,
+        "mat_file": ""
+      }
+    },
+    {
+      "id": "rustic-antique-no-mat",
+      "name": "Rustic Antique",
+      "file": "rustic-antique-no-mat.png",
+      "x": 72,
+      "y": 72,
+      "w": 1904,
+      "h": 1008,
+      "fit": {
+        "file": "rustic-antique-no-mat.png",
+        "x": 72,
+        "y": 72,
+        "w": 1904,
+        "h": 1008,
+        "fill": "blur",
+        "mat_px": 0,
+        "mat_file": ""
+      }
+    },
+    {
+      "id": "baroque-black-no-mat",
+      "name": "Baroque Black",
+      "file": "baroque-black-no-mat.png",
+      "x": 120,
+      "y": 120,
+      "w": 1808,
+      "h": 912,
+      "fit": {
+        "file": "baroque-black-no-mat.png",
+        "x": 120,
+        "y": 120,
+        "w": 1808,
+        "h": 912,
         "fill": "blur",
         "mat_px": 0,
         "mat_file": ""
@@ -233,6 +309,44 @@
         "fill": "blur",
         "mat_px": 0,
         "mat_file": ""
+      }
+    },
+    "Rustic Antique": {
+      "id": "rustic-antique",
+      "name": "Rustic Antique",
+      "file": "rustic-antique.png",
+      "x": 136,
+      "y": 136,
+      "w": 1776,
+      "h": 880,
+      "fit": {
+        "file": "rustic-antique-no-mat.png",
+        "x": 72,
+        "y": 72,
+        "w": 1904,
+        "h": 1008,
+        "fill": "mat",
+        "mat_px": 64,
+        "mat_file": "ui/mat-rustic-antique.png"
+      }
+    },
+    "Baroque Black": {
+      "id": "baroque-black",
+      "name": "Baroque Black",
+      "file": "baroque-black.png",
+      "x": 168,
+      "y": 168,
+      "w": 1712,
+      "h": 816,
+      "fit": {
+        "file": "baroque-black-no-mat.png",
+        "x": 120,
+        "y": 120,
+        "w": 1808,
+        "h": 912,
+        "fill": "mat",
+        "mat_px": 48,
+        "mat_file": "ui/mat-baroque-black.png"
       }
     }
   },
@@ -391,6 +505,86 @@
           "y": 32,
           "w": 1984,
           "h": 1088,
+          "fill": "blur",
+          "mat_px": 0,
+          "mat_file": ""
+        }
+      }
+    },
+    "Rustic Antique": {
+      "With mat": {
+        "id": "rustic-antique",
+        "name": "Rustic Antique",
+        "file": "rustic-antique.png",
+        "x": 136,
+        "y": 136,
+        "w": 1776,
+        "h": 880,
+        "fit": {
+          "file": "rustic-antique-no-mat.png",
+          "x": 72,
+          "y": 72,
+          "w": 1904,
+          "h": 1008,
+          "fill": "mat",
+          "mat_px": 64,
+          "mat_file": "ui/mat-rustic-antique.png"
+        }
+      },
+      "No mat": {
+        "id": "rustic-antique-no-mat",
+        "name": "Rustic Antique",
+        "file": "rustic-antique-no-mat.png",
+        "x": 72,
+        "y": 72,
+        "w": 1904,
+        "h": 1008,
+        "fit": {
+          "file": "rustic-antique-no-mat.png",
+          "x": 72,
+          "y": 72,
+          "w": 1904,
+          "h": 1008,
+          "fill": "blur",
+          "mat_px": 0,
+          "mat_file": ""
+        }
+      }
+    },
+    "Baroque Black": {
+      "With mat": {
+        "id": "baroque-black",
+        "name": "Baroque Black",
+        "file": "baroque-black.png",
+        "x": 168,
+        "y": 168,
+        "w": 1712,
+        "h": 816,
+        "fit": {
+          "file": "baroque-black-no-mat.png",
+          "x": 120,
+          "y": 120,
+          "w": 1808,
+          "h": 912,
+          "fill": "mat",
+          "mat_px": 48,
+          "mat_file": "ui/mat-baroque-black.png"
+        }
+      },
+      "No mat": {
+        "id": "baroque-black-no-mat",
+        "name": "Baroque Black",
+        "file": "baroque-black-no-mat.png",
+        "x": 120,
+        "y": 120,
+        "w": 1808,
+        "h": 912,
+        "fit": {
+          "file": "baroque-black-no-mat.png",
+          "x": 120,
+          "y": 120,
+          "w": 1808,
+          "h": 912,
           "fill": "blur",
           "mat_px": 0,
           "mat_file": ""
